@@ -27,6 +27,14 @@ namespace everybodydoesablogapi.Controllers
             return _context.Blogs;
         }
 
+        [HttpGet]
+        [Route("/api/Users/{id}/Blogs")]
+        public IEnumerable<Blog> GetBlogsByAuthor([FromRoute] Guid id)
+        {
+            return _context.Blogs.Where(m => m.UserId == id);
+        }
+
+
         // GET: api/Blogs/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetBlog([FromRoute] Guid id)
