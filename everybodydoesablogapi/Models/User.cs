@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using everybodydoesablogapi.Resources;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace everybodydoesablogapi.Models
 {
-    public class User 
+    public class User : LinkedResourceBase
     {
         [Key]
         public Guid UserId { get; set; }

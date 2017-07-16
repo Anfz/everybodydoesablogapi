@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using everybodydoesablogapi.Models;
+using Microsoft.AspNetCore.Mvc.Routing;
+using everybodydoesablogapi.Resources;
 
 namespace everybodydoesablogapi.Controllers
 {
@@ -14,21 +16,31 @@ namespace everybodydoesablogapi.Controllers
     public class UsersController : Controller
     {
         private readonly BlogContext _context;
+        private IUrlHelperFactory _urlHelperFactory;
 
-        public UsersController(BlogContext context)
+        public UsersController(BlogContext context,
+                               IUrlHelperFactory urlHelperFactory)
         {
             _context = context;
+            _urlHelperFactory = urlHelperFactory;
+
         }
 
         // GET: api/Users
         [HttpGet]
         public IEnumerable<User> GetUsers()
         {
-            return _context.Users;
+            
+            return _context.Users.ToList().Select( user =>
+            {
+                user = CreateLinksForUser(user);
+                return user; 
+            });
+
         }
 
         // GET: api/Users/5
-        [HttpGet("{id}")]
+        [HttpGet("{id}",Name = "GetUser")]
         public async Task<IActionResult> GetUser([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)
@@ -43,11 +55,11 @@ namespace everybodydoesablogapi.Controllers
                 return NotFound();
             }
 
-            return Ok(user);
+            return Ok(CreateLinksForUser(user));
         }
 
         // PUT: api/Users/5
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = "PutUser")]
         public async Task<IActionResult> PutUser([FromRoute] Guid id, [FromBody] User user)
         {
             if (!ModelState.IsValid)
@@ -82,7 +94,7 @@ namespace everybodydoesablogapi.Controllers
         }
 
         // POST: api/Users
-        [HttpPost]
+        [HttpPost(Name ="PostUser"), ActionName("PostUser")]
         public async Task<IActionResult> PostUser([FromBody] User user)
         {
             if (!ModelState.IsValid)
@@ -93,11 +105,11 @@ namespace everybodydoesablogapi.Controllers
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.UserId }, user);
+            return CreatedAtAction("GetUser", new { id = user.UserId }, CreateLinksForUser(user));
         }
 
         // DELETE: api/Users/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = "DeleteUser")]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
         {
             if (!ModelState.IsValid)
@@ -120,6 +132,15 @@ namespace everybodydoesablogapi.Controllers
         private bool UserExists(Guid id)
         {
             return _context.Users.Any(e => e.UserId == id);
+        }
+
+        private User CreateLinksForUser(User user)
+        {
+            var urlHelper = _urlHelperFactory.GetUrlHelper(ControllerContext);
+            user.Links.Add(new Link(urlHelper.Link("GetUser", new { id = user.UserId, controller = "Users" }), "self", "GET"));
+            user.Links.Add(new Link(urlHelper.Link("PutUser", new { id = user.UserId }), "update_user", "PUT"));
+            user.Links.Add(new Link(urlHelper.Link("DeleteUser", new { id = user.UserId }), "delete_user", "DELETE"));  
+            return user;
         }
     }
 }

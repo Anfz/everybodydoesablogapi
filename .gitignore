@@ -30,3 +30,6 @@ msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+/everybodydoesablogapi/wwwroot/lib
+/everybodydoesablogapi/wwwroot/lib
+/everybodydoesablogapi/wwwroot/lib/bootstrap/dist/css
