@@ -46,6 +46,14 @@ namespace everybodydoesablogapi.Controllers
             return Ok(post);
         }
 
+        [HttpGet]
+        [Route("/api/Blogs/{id}/Posts")]
+        public IEnumerable<Post> GetPostsByBlog([FromRoute] Guid id)
+        {
+            return _context.Posts.Where(m => m.BlogId == id);
+        }
+
+
         // PUT: api/Posts/5
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPost([FromRoute] Guid id, [FromBody] Post post)
